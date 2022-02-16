@@ -96,11 +96,11 @@
 	
 	<distributionManagement>
 	
-	    <repository>
+	    <release repository>
 	      <id>nexus</id>
 	      <name>maven-web-application-release</name>
 	      http://13.235.74.22:9036/repository/maven-web-application-release/
-	    </repository>
+	    </release repository>
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
