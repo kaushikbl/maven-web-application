@@ -58,8 +58,8 @@ pipeline {
                     version_number = artifactversion + "." + buildNumber + "." + timeStamp + "."
                     
                     currentBuild.displayName = version_number
+
                     
-                    echo version_number
                     
                     
                 sh "docker build -t maven-web-application:${version_number} ."
