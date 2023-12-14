@@ -1,75 +1,71 @@
-pipeline{
-
-agent any
-
-tools{
-maven 'maven3.8.2'
-
+pipeline {
+    
+    agent any
+    tools{
+        jdk 'jdk11'
+        maven 'maven3.6.0'
+    
+    }
+    environment{
+        SCANNER_HOME = tool 'sonar-server'
+        
+    }
+    
+    stages {
+        stage('Git-checkout') {
+            steps {
+                git changelog: false, credentialsId: 'git-jenkins', poll: false, url: 'https://github.com/kaushikbl/maven-web-application.git'
+            }
+        }
+    
+        stage('compile') {
+            steps {
+                sh "mvn clean compile"
+            }
+        }    
+        
+        stage('OWASP-scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ ', odcInstallation: 'DP'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        } 
+        stage('sonarqube') {
+            steps {
+             withSonarQubeEnv('sonarqube-server') {
+             sh "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=maven-web-application -Dsonar.projectName=maven-web-application"
+            }
+        }
+        }
+        
+        stage('mvn-Build') {
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        
+        stage("Build Docker Image") { 
+            steps {
+                script {
+                    readpom = readMavenPom file: '';
+                    
+                    artifactversion = readpom.version;
+                    
+                    timeStamp = Calendar.getInstance().getTime().format("dd-MM-yyyy.HH-mm-ss",TimeZone.getTimeZone('IST'))
+                    
+                    buildNumber = "${BUILD_NUMBER}"
+                    
+                    version_number = artifactversion + "." + buildNumber + "." + timeStamp + "."
+                    
+                    currentBuild.displayName = version_number
+                    
+                    echo version_number
+                    
+                    
+                sh "docker build -t maven-web-application:${version_number} ."
+            }
+            
+       }
+   }
 }
-
-triggers{
-pollSCM('* * * * *')
 }
-
-options{
-timestamps()
-buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5'))
-}
-
-stages{
-
-  stage('CheckOutCode'){
-    steps{
-    git branch: 'development', credentialsId: '957b543e-6f77-4cef-9aec-82e9b0230975', url: 'https://github.com/devopstrainingblr/maven-web-application-1.git'
-	
-	}
-  }
-  
-  stage('Build'){
-  steps{
-  sh  "mvn clean package"
-  }
-  }
-/*
- stage('ExecuteSonarQubeReport'){
-  steps{
-  sh  "mvn clean sonar:sonar"
-  }
-  }
-  
-  stage('UploadArtifactsIntoNexus'){
-  steps{
-  sh  "mvn clean deploy"
-  }
-  }
-  
-  stage('DeployAppIntoTomcat'){
-  steps{
-  sshagent(['bfe1b3c1-c29b-4a4d-b97a-c068b7748cd0']) {
-   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@35.154.190.162:/opt/apache-tomcat-9.0.50/webapps/"    
-  }
-  }
-  }
-  */
-}//Stages Closing
-
-post{
-
- success{
- emailext to: 'devopstrainingblr@gmail.com,mithuntechnologies@yahoo.com',
-          subject: "Pipeline Build is over .. Build # is ..${env.BUILD_NUMBER} and Build status is.. ${currentBuild.result}.",
-          body: "Pipeline Build is over .. Build # is ..${env.BUILD_NUMBER} and Build status is.. ${currentBuild.result}.",
-          replyTo: 'devopstrainingblr@gmail.com'
- }
- 
- failure{
- emailext to: 'devopstrainingblr@gmail.com,mithuntechnologies@yahoo.com',
-          subject: "Pipeline Build is over .. Build # is ..${env.BUILD_NUMBER} and Build status is.. ${currentBuild.result}.",
-          body: "Pipeline Build is over .. Build # is ..${env.BUILD_NUMBER} and Build status is.. ${currentBuild.result}.",
-          replyTo: 'devopstrainingblr@gmail.com'
- }
- 
-}
-
-
-}//Pipeline closing
