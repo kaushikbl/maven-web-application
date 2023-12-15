@@ -61,13 +61,13 @@ pipeline {
 
                     echo version_number
 
-                    
-                    
-                    
-                sh "docker build -t maven-web-application:${version_number} ."
+                    sh "docker build -t maven-web-application:${version_number} ."
+               }
             }
-            
-       }
+        }
+        stage("Docker Push") { 
+            steps {
+                sh "docker push kaushikbl/maven-web-application:${version_number}"
    }
 }
 }
