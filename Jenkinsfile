@@ -62,7 +62,7 @@ pipeline {
                     echo version_number
                     
                     
-                     sh "docker build -t maven-web-application:${version_number} ."
+                     sh "docker build -t kaushikbl/maven-web-application:${version_number} ."
                 }
            }
         }
