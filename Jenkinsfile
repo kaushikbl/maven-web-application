@@ -69,11 +69,12 @@ pipeline {
         
         stage("Login to DockerHub") {
             steps {
-                withDockerRegistry(credentialsId: 'docker-jenkins', toolName: 'docker') {
+                script {
+                   withDockerRegistry(credentialsId: 'docker-jenkins', toolName: 'docker') {
                 }
             }
         }
-
+    }
         stage('Docker Push') { 
             steps {
                 script {
