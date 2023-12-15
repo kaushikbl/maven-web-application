@@ -6,7 +6,7 @@
 	<artifactId>maven-web-application</artifactId>
 	<packaging>war</packaging>
 
-	<version>01.011.001-SNAPSHOT</version>
+	<version>1.0.01-SNAPSHOT</version>
     <name>maven-web-application</name>
 
 	<description>Maven Web Project for Java Project</description>
