@@ -59,6 +59,8 @@ pipeline {
                     
                     currentBuild.displayName = version_number
 
+                    echo version_number
+
                     
                     
                     
