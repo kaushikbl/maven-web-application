@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Git-checkout') {
             steps {
-                git changelog: false, credentialsId: 'git-jenkins', poll: false, url: 'https://github.com/kaushikbl/maven-web-application.git'
+                git credentialsId: 'git-jenkins', url: 'https://github.com/kaushikbl/maven-web-application.git'
             }
         }
     
@@ -44,7 +44,7 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') { 
+        stage("Build Docker Image") { 
             steps {
                 script {
                     readpom = readMavenPom file: '';
@@ -58,17 +58,27 @@ pipeline {
                     version_number = artifactversion + "." + buildNumber + "." + timeStamp + "."
                     
                     currentBuild.displayName = version_number
-
+                    
                     echo version_number
-
-                    sh "docker build -t maven-web-application:${version_number} ."
-               }
+                    
+                    
+                     sh "docker build -t maven-web-application:${version_number} ."
+                }
+           }
+        }
+        
+        stage("Login to DockerHub") {
+            steps {
+                withDockerRegistry(credentialsId: 'docker-jenkins', toolName: 'docker') {
+                }
             }
         }
 
         stage('Docker Push') { 
             steps {
-                sh "docker push kaushikbl/maven-web-application:${version_number}"
+                script {
+                    sh "docker push kaushikbl/maven-web-application:${version_number}"
+                }
             }
         }
-}
+    }
