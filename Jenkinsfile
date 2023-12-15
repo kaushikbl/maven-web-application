@@ -65,6 +65,7 @@ pipeline {
                }
             }
         }
+        
         stage("Docker Push") { 
             steps {
                 sh "docker push kaushikbl/maven-web-application:${version_number}"
