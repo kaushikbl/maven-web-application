@@ -44,7 +44,7 @@ pipeline {
             }
         }
         
-        stage("Build Docker Image") { 
+        stage('Build Docker Image') { 
             steps {
                 script {
                     readpom = readMavenPom file: '';
@@ -65,10 +65,10 @@ pipeline {
                }
             }
         }
-        
-        stage("Docker Push") { 
+
+        stage('Docker Push') { 
             steps {
                 sh "docker push kaushikbl/maven-web-application:${version_number}"
-   }
-}
+            }
+        }
 }
