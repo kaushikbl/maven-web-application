@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Git-checkout') {
             steps {
-                git credentialsId: 'git-jenkins', url: 'https://github.com/kaushikbl/maven-web-application.git'
+                git credentialsId: 'git-jenkins', url: 'https://github.com/kaushikbl/secretsanta-generator.git'
             }
         }
     
@@ -67,19 +67,23 @@ pipeline {
            }
         }
         
-        stage("Login to DockerHub") {
+        stage("Login & push to DockerHub") {
             steps {
                 script {
                    withDockerRegistry(credentialsId: 'docker-jenkins', toolName: 'docker') {
+                   sh "docker push kaushikbl/maven-web-application:${version_number}"
                 }
             }
         }
     }
-        stage('Docker Push') { 
+        stage('Deploy app') { 
             steps {
                 script {
-                    sh "docker push kaushikbl/maven-web-application:${version_number}"
+                    withDockerRegistry(credentialsId: 'docker-jenkins', toolName: 'docker') {
+                    sh "docker run -d --name maven-web-application -p 8080:8082 kaushikbl/maven-web-application:${version_number}"
                 }
             }
         }
     }
+}
+}
